@@ -1,5 +1,5 @@
 {
-  "name": "tanstack-router-react-example-basic-ssr-streaming-file-based",
+  "name": "ppr-setup",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,10 +14,12 @@
     "@tanstack/react-query": "^5.90.5",
     "@tanstack/react-router": "^1.133.27",
     "@tanstack/react-router-ssr-query": "^1.133.27",
+    "@tanstack/router-core": "^1.133.27",
     "@tanstack/router-plugin": "^1.133.27",
     "compression": "^1.7.5",
     "express": "^4.21.2",
     "get-port": "^7.1.0",
+    "isbot": "^5.1.31",
     "node-fetch": "^3.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

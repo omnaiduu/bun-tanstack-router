@@ -2,6 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import type { RunnableDevEnvironment, ViteDevServer } from 'vite'
 import type { ServerWebSocket } from 'bun'
+import type { PostponedState } from 'react-dom/static'
 
 const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITE_TEST_BUILD
 
@@ -30,8 +31,8 @@ export async function createServer(
       server: {
         middlewareMode: true,
         hmr: {
-          clientPort: 3002,
-          port: 3002,
+          clientPort: 3003,
+          port: 3003,
         }, // Disable Vite's own WebSocket server, we'll handle it
       },
       

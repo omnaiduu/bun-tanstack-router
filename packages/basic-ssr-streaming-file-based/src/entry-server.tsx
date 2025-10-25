@@ -3,6 +3,7 @@ import {
   RouterServer,
   createRequestHandler,
   renderRouterToStream,
+  renderRouterToString,
 } from '@tanstack/react-router/ssr/server'
 import { createRouter } from './router'
 
