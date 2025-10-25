@@ -64,9 +64,13 @@ export async function createServer(
         if (path.extname(pathname) !== '') {
           const filePath = path.join(root, 'dist', 'client', pathname)
           try {
-            
+            // Make sure the file exists before attempting to stream it
+            if (!fs.existsSync(filePath)) {
+              return new Response('Not Found', { status: 404 })
+            }
             return new Response(Bun.file(filePath), { status: 200 })
-          } catch {
+          } catch (err) {
+            console.error('Static file serve error:', err);
             return new Response('Not Found', { status: 404 })
           }
         }

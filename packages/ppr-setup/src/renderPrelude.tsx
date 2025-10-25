@@ -1,6 +1,5 @@
 import { cache } from "./cache";
-
-import { prerender } from "react-dom/static";
+import { prerender, type PrerenderResult } from "react-dom/static";
 
 const renderRouterToPPR = async ({
     router,
@@ -15,58 +14,60 @@ const renderRouterToPPR = async ({
 }) => {
     try {
         const abortController = new AbortController();
-        const pre = prerender(children, {
-            signal: abortController.signal
+        const prePromise = prerender(children, {
+            signal: abortController.signal,
+
         });
         setTimeout(() => {
             abortController.abort();
-        }); // 30 seconds timeout
+        }, 10);
+        const { prelude, postponed } = await prePromise;
 
-        let { prelude, postponed } = await pre;
 
-        // Run html extraction, cache, setRenderFinished, and injectedHtml concurrently
         const pathname = new URL(request.url).pathname;
         const [html, _] = await Promise.all([
             new Response(prelude).text(),
             (async () => {
                 if (postponed) {
-                    // Save postponed using the original pathname as the cache key.
-                    // Resume handler will strip the `/resume` prefix and look up this key.
-                    cache.set(pathname, structuredClone(postponed));
+                    cache.set(pathname, postponed);
                 }
                 router.serverSsr.setRenderFinished();
             })()
         ]);
 
-        // Inject HTML concurrently with above
         const injectedHtml = await Promise.all(router.serverSsr.injectedHtml).then(
             (htmls) => htmls.join("")
         );
 
         let finalHtml = html.replace(`</body>`, `${injectedHtml}</body>`);
 
-        // If postponed is not null, add a small meta marker in the head so the client can trigger resume streaming
         if (postponed) {
-            const serverPath = (() => {
-                try {
-                    return new URL(request.url).pathname;
-                } catch { return '/'; }
-            })();
-            const metaTag = `<meta name="ppr-resume" content="/resume${serverPath}" />`;
-            const headCloseIdx = finalHtml.indexOf('</head>');
-            if (headCloseIdx !== -1) {
-                finalHtml = finalHtml.slice(0, headCloseIdx) + metaTag + finalHtml.slice(headCloseIdx);
-            } else {
-                // fallback: if no </head> found, prepend to start
-                finalHtml = metaTag + finalHtml;
-            }
+            const serverPath = new URL(request.url).pathname || '/';
+
+            const inlineScript = `<script>(async function(){
+                try{
+                    var url = '/resume' + '${serverPath}';
+                    var res = await fetch(url);
+                    if(!res.ok) return;
+                    var fullHtml = await res.text();
+                    if(!fullHtml.trim()) return;
+                    var cleanHtml = fullHtml.replace(/<\\/body>[\\s\\S]*<\\/html>$/i,'').trim();
+                    var range = document.createRange();
+                    range.selectNode(document.body);
+                    var fragment = range.createContextualFragment(cleanHtml);
+                    var placeholder = document.querySelector('[id^="B:"]');
+                    if (placeholder) {
+                        placeholder.after(fragment);
+                    } else {
+                        document.body.appendChild(fragment);
+                    }
+                }catch(e){console.error('Inline resume failed',e)}
+            })();</script>`;
+
+            finalHtml = finalHtml.replace(`</body>`, `${inlineScript}</body>`);
         }
-        console.log("Postponed value:", postponed ? 'exists' : 'none');
 
-
-
-
-        return new Response(`<!DOCTYPE html>${finalHtml}`, {
+        return new Response(finalHtml, {
             status: router.state.statusCode,
             headers: responseHeaders
         });

@@ -8,7 +8,7 @@ const API_URL = 'https://jsonplaceholder.typicode.com/todos/1';
 const queryOption = queryOptions({
   queryKey: ['demo-todo'],
   queryFn: async () => {
-    await new Promise((r) => setTimeout(r, 2000)); // Simulate network delay
+   
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error('Failed to fetch');
     return res.json();

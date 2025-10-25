@@ -85,7 +85,7 @@ export async function render({
         return await resumeHandler(async ({ request: _req, responseHeaders: _h, router: resumeRouter }) => {
           try {
             const stream = await resume(<RouterServer router={resumeRouter} />, structuredClone(postponed), {
-              nonce: resumeRouter.options.ssr?.nonce,
+              signal: request.signal,
               onError: (error) => {
                 console.error('Error occurred while resuming:', error);
               },
