@@ -58,22 +58,60 @@
   }
   ignoreScroll = !1;
 })({"storageKey":"tsr-scroll-restoration-v1_3","shouldScrollRestoration":true});$_TSR.c()</script><!--/$--> <script id="_R_">requestAnimationFrame(function(){$RT=performance.now()});</script><script  class='$tsr'>(self.$R=self.$R||{})["tsr"]=[];self.$_TSR={c(){document.querySelectorAll(".\\$tsr").forEach(e=>{e.remove()})},p(e){this.initialized?e():this.buffer.push(e)},buffer:[]};
-;$_TSR.router=($R=>$R[0]={manifest:void 0,matches:$R[1]=[$R[2]={i:"__root__",u:1761456013114,s:"success",ssr:!0},$R[3]={i:"/posts",u:1761456013114,s:"success",l:$R[4]={},ssr:!0},$R[5]={i:"/posts/",u:1761456013114,s:"success",ssr:!0}],lastMatchId:"/posts/",dehydratedData:$R[6]={queryStream:$R[7]=($R[8]=d=>new ReadableStream({start:c=>{d.on({next:v=>{try{c.enqueue(v)}catch{}},throw:v=>{c.error(v)},return:()=>{try{c.close()}catch{}}})}}))($R[9]=($R[10]=(b,a,s,l,p,f,e,n)=>(b=[],a=!0,s=!1,l=[],p=0,f=(v,m,x)=>{for(x=0;x<p;x++)l[x]&&l[x][m](v)},n=(o,x,z,c)=>{for(x=0,z=b.length;x<z;x++)(c=b[x],(!a&&x===z-1)?o[s?"return":"throw"](c):o.next(c))},e=(o,t)=>(a&&(l[t=p++]=o),n(o),()=>{a&&(l[t]=void 0)}),{__SEROVAL_STREAM__:!0,on:o=>e(o),next:v=>{a&&(b.push(v),f(v,"next"))},throw:v=>{a&&(b.push(v),f(v,"throw"),a=s=!1,l.length=0)},return:v=>{a&&(b.push(v),f(v,"return"),a=!1,s=!0,l.length=0)}}))()),dehydratedQueryClient:$R[11]={mutations:$R[12]=[],queries:$R[13]=[$R[14]={dehydratedAt:1761456013115,state:$R[15]={data:void 0,dataUpdateCount:0,dataUpdatedAt:0,error:null,errorUpdateCount:0,errorUpdatedAt:0,fetchFailureCount:0,fetchFailureReason:null,fetchMeta:null,isInvalidated:!1,status:"pending",fetchStatus:"fetching"},queryKey:$R[16]=["posts"],queryHash:"[\"posts\"]",promise:$R[17]=($R[19]=r=>(r.p=new Promise((s,f)=>{r.s=s,r.f=f})))($R[18]={p:0,s:0,f:0})}]}}})($R["tsr"]);$_TSR.c()</script><script  class='$tsr'>($R=>$R[9].return(void 0))($R["tsr"]);$_TSR.c()</script><script>(async function(){
-                try{
-                    var url = '/resume/posts';
-                    var res = await fetch(url);
-                    if(!res.ok) return;
-                    var fullHtml = await res.text();
-                    if(!fullHtml.trim()) return;
-                    var cleanHtml = fullHtml.replace(/<\/body>[\s\S]*<\/html>$/i,'').trim();
-                    var range = document.createRange();
-                    range.selectNode(document.body);
-                    var fragment = range.createContextualFragment(cleanHtml);
-                    var placeholder = document.querySelector('[id^="B:"]');
-                    if (placeholder) {
-                        placeholder.after(fragment);
-                    } else {
-                        document.body.appendChild(fragment);
-                    }
-                }catch(e){console.error('Inline resume failed',e)}
-            })();</script></body></html>
+;$_TSR.router=($R=>$R[0]={manifest:void 0,matches:$R[1]=[$R[2]={i:"__root__",u:1761494844804,s:"success",ssr:!0},$R[3]={i:"/posts",u:1761494844805,s:"success",l:$R[4]={},ssr:!0},$R[5]={i:"/posts/",u:1761494844805,s:"success",ssr:!0}],lastMatchId:"/posts/",dehydratedData:$R[6]={queryStream:$R[7]=($R[8]=d=>new ReadableStream({start:c=>{d.on({next:v=>{try{c.enqueue(v)}catch{}},throw:v=>{c.error(v)},return:()=>{try{c.close()}catch{}}})}}))($R[9]=($R[10]=(b,a,s,l,p,f,e,n)=>(b=[],a=!0,s=!1,l=[],p=0,f=(v,m,x)=>{for(x=0;x<p;x++)l[x]&&l[x][m](v)},n=(o,x,z,c)=>{for(x=0,z=b.length;x<z;x++)(c=b[x],(!a&&x===z-1)?o[s?"return":"throw"](c):o.next(c))},e=(o,t)=>(a&&(l[t=p++]=o),n(o),()=>{a&&(l[t]=void 0)}),{__SEROVAL_STREAM__:!0,on:o=>e(o),next:v=>{a&&(b.push(v),f(v,"next"))},throw:v=>{a&&(b.push(v),f(v,"throw"),a=s=!1,l.length=0)},return:v=>{a&&(b.push(v),f(v,"return"),a=!1,s=!0,l.length=0)}}))()),dehydratedQueryClient:$R[11]={mutations:$R[12]=[],queries:$R[13]=[$R[14]={dehydratedAt:1761494844806,state:$R[15]={data:void 0,dataUpdateCount:0,dataUpdatedAt:0,error:null,errorUpdateCount:0,errorUpdatedAt:0,fetchFailureCount:0,fetchFailureReason:null,fetchMeta:null,isInvalidated:!1,status:"pending",fetchStatus:"fetching"},queryKey:$R[16]=["posts"],queryHash:"[\"posts\"]",promise:$R[17]=($R[19]=r=>(r.p=new Promise((s,f)=>{r.s=s,r.f=f})))($R[18]={p:0,s:0,f:0})}]}}})($R["tsr"]);$_TSR.c()</script><script  class='$tsr'>($R=>$R[9].return(void 0))($R["tsr"]);$_TSR.c()</script><script>document.addEventListener('DOMContentLoaded', async function(){
+    try {
+    function removeSuffix(str, suffix) {
+  if (str.endsWith(suffix)) {
+    return str.slice(0, -suffix.length);
+  }
+    return str;
+}
+        var url = "/resume";
+        var res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: "{\"postponed\":\"{\\\"nextSegmentId\\\":1,\\\"rootFormatContext\\\":{\\\"insertionMode\\\":0,\\\"selectedValue\\\":null,\\\"tagScope\\\":0,\\\"viewTransition\\\":null},\\\"progressiveChunkSize\\\":12800,\\\"resumableState\\\":{\\\"idPrefix\\\":\\\"\\\",\\\"nextFormID\\\":0,\\\"streamingFormat\\\":0,\\\"instructions\\\":96,\\\"hasBody\\\":true,\\\"hasHtml\\\":true,\\\"unknownResources\\\":{},\\\"dnsResources\\\":{},\\\"connectResources\\\":{\\\"default\\\":{},\\\"anonymous\\\":{},\\\"credentials\\\":{}},\\\"imageResources\\\":{},\\\"styleResources\\\":{},\\\"scriptResources\\\":{},\\\"moduleUnknownResources\\\":{},\\\"moduleScriptResources\\\":{}},\\\"replayNodes\\\":[[\\\"RouterServer\\\",0,[[\\\"RouterProvider\\\",0,[[\\\"RouterContextProvider\\\",0,[[null,0,[[\\\"QueryClientProvider\\\",0,[[\\\"Context\\\",0,[[\\\"Fragment\\\",0,[[\\\"Context\\\",0,[[\\\"Matches\\\",0,[[\\\"SafeFragment\\\",0,[[\\\"Fragment\\\",0,[[\\\"MatchesInner\\\",1,[[\\\"Context\\\",0,[[\\\"CatchBoundary\\\",0,[[\\\"CatchBoundaryImpl\\\",0,[[\\\"MatchImpl\\\",0,[[\\\"SafeFragment\\\",0,[[\\\"Fragment\\\",0,[[\\\"Context\\\",0,[[\\\"SafeFragment\\\",0,[[\\\"Fragment\\\",0,[[\\\"SafeFragment\\\",0,[[\\\"Fragment\\\",0,[[\\\"SafeFragment\\\",0,[[\\\"Fragment\\\",0,[[\\\"MatchInnerImpl\\\",0,[[\\\"RootComponent\\\",0,[[\\\"html\\\",0,[[\\\"body\\\",1,[[\\\"OutletImpl\\\",2,[[\\\"Suspense\\\",0,[[\\\"MatchImpl\\\",0,[[\\\"SafeFragment\\\",0,[[\\\"Fragment\\\",0,[[\\\"Context\\\",0,[[\\\"Suspense\\\",0,[[\\\"SafeFragment\\\",0,[[\\\"Fragment\\\",0,[[\\\"SafeFragment\\\",0,[[\\\"Fragment\\\",0,[[\\\"MatchInnerImpl\\\",0,[[\\\"Lazy\\\",0,[],0]],null]],null]],null]],null]],null]],null,[\\\"Suspense Fallback\\\",0,[],null],0]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],null]],\\\"replaySlots\\\":null}\",\"path\":\"/posts\"}"
+        });
+        if (!res.ok) return;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        const range = document.createRange();
+        const target =  document.body; 
+        range.selectNodeContents(target);  // Fixed: Use selectNodeContents for inner context
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                console.log('Stream complete');
+                break;
+            }
+            let html = decoder.decode(value, { stream: true });
+           
+            
+            // Skip if empty
+            if (!html.trim()) continue;
+
+            html = removeSuffix(html, '</body></html>');
+            console.log('Cleaned HTML chunk:', html);
+            const fragment = range.createContextualFragment(html);
+
+            
+
+            // // Extract & recreate scripts
+            // Array.from(fragment.querySelectorAll('script')).forEach(oldScript => {
+            //     const newScript = document.createElement('script');
+            //     newScript.textContent = oldScript.textContent;
+            //     Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            //     document.head.appendChild(newScript); // Runs ASAP
+            //     oldScript.remove();
+            // });
+            
+
+
+
+            // Append cleaned nodes
+           target.appendChild(fragment);
+        }
+    } catch (e) {
+        console.error('Inline resume failed', e);
+    }
+});</script></body></html>

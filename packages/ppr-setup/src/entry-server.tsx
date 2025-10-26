@@ -11,6 +11,12 @@ import { resume } from 'react-dom/server.edge'
 import { renderRouterToPPR } from './renderPrelude'
 const isProd = process.env.NODE_ENV === 'production'
 
+
+export type ResumeBody = {
+  postponed: string
+  path: string
+}
+
 export async function render({
   req,
 
@@ -46,65 +52,79 @@ export async function render({
 
   console.log('Handling request for:', pathname);
 
+
+
+  if (pathname.startsWith('/resume')) {
+    // Use the full pathname as the cache key (e.g. /resume or /resume/123)
+
+
+    // Strip the /resume prefix to get the original pathname used as the cache key
+
+
+
+
+    const regBody = await req.json() as ResumeBody;
+    const postponed = JSON.parse(regBody.postponed);
+    const originalPath = regBody.path;
+    console.log('Resuming for original path:', originalPath);
+    if (postponed) {
+      const baseUrl = new URL(req.url);
+      const originalUrl = new URL(originalPath, `${baseUrl.protocol}//${baseUrl.host}`);
+
+      const resumeHandler = createRequestHandler({
+        request: new Request(originalUrl.toString(), {
+          method: req.method,
+          headers: req.headers,
+        }),
+        createRouter: () => {
+          const r = createRouter();
+          // keep same head/context as main router
+          r.update({
+            context: {
+              ...r.options.context,
+              head: r.options.context.head,
+            },
+          });
+          return r;
+        },
+      });
+
+      // Use the resumeHandler to obtain a router instance matching the original path
+      return await resumeHandler(async ({ request: _req, responseHeaders: _h, router: resumeRouter }) => {
+        try {
+          const stream = await resume(<RouterServer router={resumeRouter} />, structuredClone(postponed), {
+            signal: req.signal,
+            onError: (error) => {
+              console.error('Error occurred while resuming:', error);
+            },
+          });
+          return new Response(stream, {
+            status: 200,
+            headers: { 'Content-Type': 'text/html' },
+          });
+        } catch (err) {
+          console.error('Resume render failed:', err);
+          return new Response('Resume failed', { status: 500 });
+        }
+      });
+    }
+
+
+  }
+
+
+
+
+
+
   // Stream the response body for all other routes
   return handler(async ({ request, responseHeaders, router }) => {
     console.log(isProd ? 'Production render' : 'Development render')
 
 
-    if (pathname.startsWith('/resume')) {
-      // Use the full pathname as the cache key (e.g. /resume or /resume/123)
-
-      const cacheKey = pathname.slice(7,);
-      // Strip the /resume prefix to get the original pathname used as the cache key
-      const originalPath = cacheKey
-      const postponed = cache.get(cacheKey);
-      console.log('Resuming from cache key:', cacheKey, 'Original path:', originalPath, 'Postponed found:', !!postponed);
-      if (postponed) {
-        const baseUrl = new URL(request.url);
-        const originalUrl = new URL(originalPath, `${baseUrl.protocol}//${baseUrl.host}`);
-
-        const resumeHandler = createRequestHandler({
-          request: new Request(originalUrl.toString(), {
-            method: request.method,
-            headers: request.headers,
-          }),
-          createRouter: () => {
-            const r = createRouter();
-            // keep same head/context as main router
-            r.update({
-              context: {
-                ...r.options.context,
-                head: router.options.context.head,
-              },
-            });
-            return r;
-          },
-        });
-
-        // Use the resumeHandler to obtain a router instance matching the original path
-        return await resumeHandler(async ({ request: _req, responseHeaders: _h, router: resumeRouter }) => {
-          try {
-            const stream = await resume(<RouterServer router={resumeRouter} />, structuredClone(postponed), {
-              signal: request.signal,
-              onError: (error) => {
-                console.error('Error occurred while resuming:', error);
-              },
-            });
-            return new Response(stream, {
-              status: 200,
-              headers: { 'Content-Type': 'text/html' },
-            });
-          } catch (err) {
-            console.error('Resume render failed:', err);
-            return new Response('Resume failed', { status: 500 });
-          }
-        });
-      }
-      return new Response('No postponed data found for resumption.', { status: 404 });
-    }
 
     if (isProd) {
-      
+
       return renderRouterToPPR({
         request,
         router,
@@ -112,7 +132,7 @@ export async function render({
         children: <RouterServer router={router} />,
       })
     } else {
-    
+
       return renderRouterToStream({
         request,
         responseHeaders,

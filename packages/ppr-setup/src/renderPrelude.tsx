@@ -18,26 +18,30 @@ const renderRouterToPPR = async ({
 
         const fh = file("./html" + pathname)
 
-        if (await fh.exists()) {
-            console.log('Serving cached HTML for:', pathname);
-            const existingContent = fh.stream();
-            return new Response(existingContent, {
-                status: 200,
-                headers: responseHeaders
-            });
-        }
+        // if (await fh.exists()) {
+        //     console.log('Serving cached HTML for:', pathname);
+        //     const existingContent = fh.stream();
+        //     return new Response(existingContent, {
+        //         status: 200,
+        //         headers: responseHeaders
+        //     });
+        // }
         const abortController = new AbortController();
+
         const prePromise = prerender(children, {
             signal: abortController.signal,
             onError: (error) => {
                 console.error('Prelude render error:', error);
             }
         });
+
+        // Abort prelude render if it takes too long (100ms)
         setTimeout(() => {
             abortController.abort();
-        });
-        const { prelude, postponed } = await prePromise;
+        }, 100);
 
+        const { prelude, postponed } = await prePromise;
+        
 
         const postponedKey = new URL(request.url).pathname;
         console.log('Postponed key for caching:', postponedKey);
@@ -59,27 +63,68 @@ const renderRouterToPPR = async ({
 
         if (postponed) {
 
+            const reqbody = {
+                postponed: JSON.stringify(postponed),
+                path: new URL(request.url).pathname
+            }
+            const jsonBody = JSON.stringify(reqbody)
+            const inlineScript = `<script>document.addEventListener('DOMContentLoaded', async function(){
+    try {
+    function removeSuffix(str, suffix) {
+  if (str.endsWith(suffix)) {
+    return str.slice(0, -suffix.length);
+  }
+    return str;
+}
+        var url = "/resume";
+        var res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: ${JSON.stringify(jsonBody)}
+        });
+        if (!res.ok) return;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        const range = document.createRange();
+        const target =  document.body; 
+        range.selectNodeContents(target);  // Fixed: Use selectNodeContents for inner context
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                console.log('Stream complete');
+                break;
+            }
+            let html = decoder.decode(value, { stream: true });
+           
+            
+            // Skip if empty
+            if (!html.trim()) continue;
 
-            const inlineScript = `<script>(async function(){
-                try{
-                    var url = '${"/resume" + postponedKey}';
-                    var res = await fetch(url);
-                    if(!res.ok) return;
-                    var fullHtml = await res.text();
-                    if(!fullHtml.trim()) return;
-                    var cleanHtml = fullHtml.replace(/<\\/body>[\\s\\S]*<\\/html>$/i,'').trim();
-                    var range = document.createRange();
-                    range.selectNode(document.body);
-                    var fragment = range.createContextualFragment(cleanHtml);
-                    var placeholder = document.querySelector('[id^="B:"]');
-                    if (placeholder) {
-                        placeholder.after(fragment);
-                    } else {
-                        document.body.appendChild(fragment);
-                    }
-                }catch(e){console.error('Inline resume failed',e)}
-            })();</script>`;
+            html = removeSuffix(html, '</body></html>');
+            console.log('Cleaned HTML chunk:', html);
+            const fragment = range.createContextualFragment(html);
 
+            
+
+            // // Extract & recreate scripts
+            // Array.from(fragment.querySelectorAll('script')).forEach(oldScript => {
+            //     const newScript = document.createElement('script');
+            //     newScript.textContent = oldScript.textContent;
+            //     Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            //     document.head.appendChild(newScript); // Runs ASAP
+            //     oldScript.remove();
+            // });
+            
+
+
+
+            // Append cleaned nodes
+           target.appendChild(fragment);
+        }
+    } catch (e) {
+        console.error('Inline resume failed', e);
+    }
+});</script>`;
             finalHtml = finalHtml.replace(`</body>`, `${inlineScript}</body>`);
         }
 
