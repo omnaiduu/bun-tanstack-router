@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head><script src="https://unpkg.com/@tailwindcss/browser@4"></script><script type="module" src="/static/entry-client.js"></script></head><body><div class="p-2 flex gap-2 text-lg"><a class="font-bold" href="/" data-status="active" aria-current="page">Home</a> <a href="/posts">Posts</a> <a href="/error">Error</a></div><hr/><!--$--><!--$?--><template id="B:0"></template><div>Loading...</div><!--/$--><script></script><script class="$tsr">(function restoreScroll({
+  storageKey: storageKey2,
+  key,
+  behavior,
+  shouldScrollRestoration,
+  scrollToTopSelectors,
+  location
+}) {
+  let byKey;
+  try {
+    byKey = JSON.parse(sessionStorage.getItem(storageKey2) || "{}");
+  } catch (error) {
+    console.error(error);
+    return;
+  }
+  const resolvedKey = key || window.history.state?.__TSR_key, elementEntries = byKey[resolvedKey];
+  ignoreScroll = !0;
+  scroll: {
+    if (shouldScrollRestoration && elementEntries && Object.keys(elementEntries).length > 0) {
+      for (const elementSelector in elementEntries) {
+        const entry = elementEntries[elementSelector];
+        if (elementSelector === "window")
+          window.scrollTo({
+            top: entry.scrollY,
+            left: entry.scrollX,
+            behavior
+          });
+        else if (elementSelector) {
+          const element = document.querySelector(elementSelector);
+          if (element) {
+            element.scrollLeft = entry.scrollX;
+            element.scrollTop = entry.scrollY;
+          }
+        }
+      }
+      break scroll;
+    }
+    const hash = (location ?? window.location).hash.split("#", 2)[1];
+    if (hash) {
+      const hashScrollIntoViewOptions = window.history.state?.__hashScrollIntoViewOptions ?? !0;
+      if (hashScrollIntoViewOptions) {
+        const el = document.getElementById(hash);
+        if (el)
+          el.scrollIntoView(hashScrollIntoViewOptions);
+      }
+      break scroll;
+    }
+    const scrollOptions = { top: 0, left: 0, behavior };
+    window.scrollTo(scrollOptions);
+    if (scrollToTopSelectors)
+      for (const selector of scrollToTopSelectors) {
+        if (selector === "window")
+          continue;
+        const element = typeof selector === "function" ? selector() : document.querySelector(selector);
+        if (element)
+          element.scrollTo(scrollOptions);
+      }
+  }
+  ignoreScroll = !1;
+})({"storageKey":"tsr-scroll-restoration-v1_3","shouldScrollRestoration":true});$_TSR.c()</script><!--/$--> <script id="_R_">requestAnimationFrame(function(){$RT=performance.now()});</script><script  class='$tsr'>(self.$R=self.$R||{})["tsr"]=[];self.$_TSR={c(){document.querySelectorAll(".\\$tsr").forEach(e=>{e.remove()})},p(e){this.initialized?e():this.buffer.push(e)},buffer:[]};
+;$_TSR.router=($R=>$R[0]={manifest:void 0,matches:$R[1]=[$R[2]={i:"__root__",u:1761456404279,s:"success",ssr:!0},$R[3]={i:"/",u:1761456404280,s:"success",l:$R[4]={},ssr:!0}],lastMatchId:"/",dehydratedData:$R[5]={queryStream:$R[6]=($R[7]=d=>new ReadableStream({start:c=>{d.on({next:v=>{try{c.enqueue(v)}catch{}},throw:v=>{c.error(v)},return:()=>{try{c.close()}catch{}}})}}))($R[8]=($R[9]=(b,a,s,l,p,f,e,n)=>(b=[],a=!0,s=!1,l=[],p=0,f=(v,m,x)=>{for(x=0;x<p;x++)l[x]&&l[x][m](v)},n=(o,x,z,c)=>{for(x=0,z=b.length;x<z;x++)(c=b[x],(!a&&x===z-1)?o[s?"return":"throw"](c):o.next(c))},e=(o,t)=>(a&&(l[t=p++]=o),n(o),()=>{a&&(l[t]=void 0)}),{__SEROVAL_STREAM__:!0,on:o=>e(o),next:v=>{a&&(b.push(v),f(v,"next"))},throw:v=>{a&&(b.push(v),f(v,"throw"),a=s=!1,l.length=0)},return:v=>{a&&(b.push(v),f(v,"return"),a=!1,s=!0,l.length=0)}}))()),dehydratedQueryClient:$R[10]={mutations:$R[11]=[],queries:$R[12]=[$R[13]={dehydratedAt:1761456404280,state:$R[14]={data:void 0,dataUpdateCount:0,dataUpdatedAt:0,error:null,errorUpdateCount:0,errorUpdatedAt:0,fetchFailureCount:0,fetchFailureReason:null,fetchMeta:null,isInvalidated:!1,status:"pending",fetchStatus:"fetching"},queryKey:$R[15]=["demo-todo"],queryHash:"[\"demo-todo\"]",promise:$R[16]=($R[18]=r=>(r.p=new Promise((s,f)=>{r.s=s,r.f=f})))($R[17]={p:0,s:0,f:0})}]}}})($R["tsr"]);$_TSR.c()</script><script  class='$tsr'>($R=>$R[8].return(void 0))($R["tsr"]);$_TSR.c()</script><script>(async function(){
+                try{
+                    var url = '/resume/';
+                    var res = await fetch(url);
+                    if(!res.ok) return;
+                    var fullHtml = await res.text();
+                    if(!fullHtml.trim()) return;
+                    var cleanHtml = fullHtml.replace(/<\/body>[\s\S]*<\/html>$/i,'').trim();
+                    var range = document.createRange();
+                    range.selectNode(document.body);
+                    var fragment = range.createContextualFragment(cleanHtml);
+                    var placeholder = document.querySelector('[id^="B:"]');
+                    if (placeholder) {
+                        placeholder.after(fragment);
+                    } else {
+                        document.body.appendChild(fragment);
+                    }
+                }catch(e){console.error('Inline resume failed',e)}
+            })();</script></body></html>

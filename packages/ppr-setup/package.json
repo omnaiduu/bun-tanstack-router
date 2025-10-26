@@ -7,10 +7,11 @@
     "build": "bun run build:client && bun run build:server",
     "build:client": "bunx --bun vite build",
     "build:server": "bunx --bun vite build --ssr",
-    "serve": "NODE_ENV=production bun server",
+    "serve": " NODE_ENV=production bun server",
     "debug": "bun --inspect-brk server"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@tanstack/react-query": "^5.90.5",
     "@tanstack/react-router": "^1.133.27",
     "@tanstack/react-router-ssr-query": "^1.133.27",

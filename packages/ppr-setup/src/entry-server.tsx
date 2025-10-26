@@ -51,13 +51,13 @@ export async function render({
     console.log(isProd ? 'Production render' : 'Development render')
 
 
-    if (pathname === '/resume' || pathname.startsWith('/resume/')) {
+    if (pathname.startsWith('/resume')) {
       // Use the full pathname as the cache key (e.g. /resume or /resume/123)
 
-      const cacheKey = pathname;
-      // Strip the /resume prefix to get the originalpathname used as the cache key
-      const originalPath = cacheKey.replace(/^\/resume/, '') || '/';
-      const postponed = cache.get(originalPath);
+      const cacheKey = pathname.slice(7,);
+      // Strip the /resume prefix to get the original pathname used as the cache key
+      const originalPath = cacheKey
+      const postponed = cache.get(cacheKey);
       console.log('Resuming from cache key:', cacheKey, 'Original path:', originalPath, 'Postponed found:', !!postponed);
       if (postponed) {
         const baseUrl = new URL(request.url);
@@ -104,7 +104,7 @@ export async function render({
     }
 
     if (isProd) {
-      console.log('Production render')
+      
       return renderRouterToPPR({
         request,
         router,
@@ -112,7 +112,7 @@ export async function render({
         children: <RouterServer router={router} />,
       })
     } else {
-      console.log('Development render')
+    
       return renderRouterToStream({
         request,
         responseHeaders,
