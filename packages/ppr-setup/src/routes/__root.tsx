@@ -14,6 +14,26 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     
     scripts: [
       {
+        type: "module",
+        
+        children: `(async () => {
+            const response = await fetch('/resume', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ path: location.pathname })
+            });
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              const chunk = decoder.decode(value);
+              const fragment = document.createRange().createContextualFragment(chunk);
+              document.body.appendChild(fragment);
+            }
+          })()`,
+    },
+      {
         src: 'https://unpkg.com/@tailwindcss/browser@4',
       },
       ...(!import.meta.env.PROD

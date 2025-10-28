@@ -83,7 +83,9 @@ export async function createServer(
 
       // Development
       const accept = req.headers.get("accept") || "";
-      if (!accept.includes("text/html")) {
+
+      
+      if (!accept.includes("text/html") && !pathname.startsWith("/resume")) {
         // Serve modules/assets via Vite
         const requestPath = pathname + url.search;
         const clientEnv = vite?.environments?.client;
@@ -114,6 +116,7 @@ export async function createServer(
           viteHead.indexOf("<head>") + 6,
           viteHead.indexOf("</head>")
         );
+       
 
         const entry = await serverEnv.runner.import("/src/entry-server.tsx");
         const render =
