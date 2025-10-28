@@ -1,7 +1,7 @@
 import {  type AnyRouter } from "@tanstack/react-router";
 import { createRequestHandler } from "@tanstack/router-core/ssr/server";
 import { cache } from "./cache";
-import { resume } from "react-dom/server";
+import { resume } from "react-dom/server.edge";
 import { RouterServer } from "@tanstack/react-router/ssr/server";
 import { createRouter } from "./router";
 export async function resumeStream({
