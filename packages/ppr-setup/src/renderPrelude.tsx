@@ -1,6 +1,14 @@
-import { cache } from "./cache";
-import { prerender, type PrerenderResult } from "react-dom/static";
+
+import { PostponedState, prerender, type PrerenderResult } from "react-dom/static";
 import { file, write } from "bun"
+import { resume } from "react-dom/server";
+
+
+
+const cache = new Map<string, {
+    postponed: string;
+    html: string;
+}>()
 const renderRouterToPPR = async ({
     router,
     responseHeaders,
@@ -18,14 +26,34 @@ const renderRouterToPPR = async ({
 
         const fh = file("./html" + pathname)
 
-        // if (await fh.exists()) {
-        //     console.log('Serving cached HTML for:', pathname);
-        //     const existingContent = fh.stream();
-        //     return new Response(existingContent, {
-        //         status: 200,
-        //         headers: responseHeaders
-        //     });
-        // }
+        if (cache.has(pathname)) {
+            console.log('Serving cached HTML for:', pathname);
+            const existingContent = cache.get(pathname)!;
+
+
+
+            const resumed = await resume(children, JSON.parse(existingContent.postponed));
+
+            const stream = new ReadableStream({
+                async start(controller) {
+                    controller.enqueue(existingContent.html)
+
+                    const reader = resumed.getReader();
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        controller.enqueue(value);
+
+                    }
+                    controller.close();
+                },
+            })
+            return new Response(stream, {
+                status: router.state.statusCode,
+                headers: responseHeaders
+            });
+           
+        }
         const abortController = new AbortController();
 
         const prePromise = prerender(children, {
@@ -38,23 +66,16 @@ const renderRouterToPPR = async ({
         // Abort prelude render if it takes too long (100ms)
         setTimeout(() => {
             abortController.abort();
-        }, 100);
+        });
 
         const { prelude, postponed } = await prePromise;
-        
+
 
         const postponedKey = new URL(request.url).pathname;
         console.log('Postponed key for caching:', postponedKey);
-        const [html, _] = await Promise.all([
-            new Response(prelude).text(),
-            (async () => {
-                if (postponed) {
-                    cache.set(postponedKey, postponed);
-                }
-                router.serverSsr.setRenderFinished();
-            })()
-        ]);
-
+        router.serverSsr.setRenderFinished();
+        const html = await new Response(prelude).text();
+       
         const injectedHtml = await Promise.all(router.serverSsr.injectedHtml).then(
             (htmls) => htmls.join("")
         );
@@ -63,72 +84,100 @@ const renderRouterToPPR = async ({
 
         if (postponed) {
 
-            const reqbody = {
-                postponed: JSON.stringify(postponed),
-                path: new URL(request.url).pathname
-            }
-            const jsonBody = JSON.stringify(reqbody)
-            const inlineScript = `<script>document.addEventListener('DOMContentLoaded', async function(){
-    try {
-    function removeSuffix(str, suffix) {
-  if (str.endsWith(suffix)) {
-    return str.slice(0, -suffix.length);
-  }
-    return str;
-}
-        var url = "/resume";
-        var res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: ${JSON.stringify(jsonBody)}
-        });
-        if (!res.ok) return;
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        const range = document.createRange();
-        const target =  document.body; 
-        range.selectNodeContents(target);  // Fixed: Use selectNodeContents for inner context
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-                console.log('Stream complete');
-                break;
-            }
-            let html = decoder.decode(value, { stream: true });
+            // const reqbody = {
+            //     postponed: JSON.stringify(postponed),
+            //     path: new URL(request.url).pathname
+            // }
+//             const jsonBody = JSON.stringify(reqbody)
+//             const inlineScript = `<script>document.addEventListener('DOMContentLoaded', async function(){
+//     try {
+//     function removeSuffix(str, suffix) {
+//   if (str.endsWith(suffix)) {
+//     return str.slice(0, -suffix.length);
+//   }
+//     return str;
+// }
+//         var url = "/resume";
+//         var res = await fetch(url, {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: ${JSON.stringify(jsonBody)}
+//         });
+//         if (!res.ok) return;
+//         const reader = res.body.getReader();
+//         const decoder = new TextDecoder("utf-8");
+//         const range = document.createRange();
+//         const target =  document.body; 
+//         range.selectNodeContents(target);  // Fixed: Use selectNodeContents for inner context
+//         while (true) {
+//             const { done, value } = await reader.read();
+//             if (done) {
+//                 console.log('Stream complete');
+//                 break;
+//             }
+//             let html = decoder.decode(value, { stream: true });
            
             
-            // Skip if empty
-            if (!html.trim()) continue;
+//             // Skip if empty
+//             if (!html.trim()) continue;
 
-            html = removeSuffix(html, '</body></html>');
-            console.log('Cleaned HTML chunk:', html);
-            const fragment = range.createContextualFragment(html);
+//             html = removeSuffix(html, '</body></html>');
+//             console.log('Cleaned HTML chunk:', html);
+//             const fragment = range.createContextualFragment(html);
 
             
 
-            // // Extract & recreate scripts
-            // Array.from(fragment.querySelectorAll('script')).forEach(oldScript => {
-            //     const newScript = document.createElement('script');
-            //     newScript.textContent = oldScript.textContent;
-            //     Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-            //     document.head.appendChild(newScript); // Runs ASAP
-            //     oldScript.remove();
-            // });
+//             // // Extract & recreate scripts
+//             // Array.from(fragment.querySelectorAll('script')).forEach(oldScript => {
+//             //     const newScript = document.createElement('script');
+//             //     newScript.textContent = oldScript.textContent;
+//             //     Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+//             //     document.head.appendChild(newScript); // Runs ASAP
+//             //     oldScript.remove();
+//             // });
             
 
 
 
-            // Append cleaned nodes
-           target.appendChild(fragment);
-        }
-    } catch (e) {
-        console.error('Inline resume failed', e);
-    }
-});</script>`;
-            finalHtml = finalHtml.replace(`</body>`, `${inlineScript}</body>`);
+//             // Append cleaned nodes
+//            target.appendChild(fragment);
+//         }
+//     } catch (e) {
+//         console.error('Inline resume failed', e);
+//     }
+// });</script>`;
+//             finalHtml = finalHtml.replace(`</body>`, `${inlineScript}</body>`);
+
+cache.set(pathname, {
+                postponed: JSON.stringify(postponed),
+                html: finalHtml
+})
+
+            const resumed = await resume(children, postponed)
+
+            const stream = new ReadableStream({
+                async start(controller) {
+                    controller.enqueue(finalHtml)
+
+                    const reader = resumed.getReader();
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        controller.enqueue(value);
+
+                    }
+                    controller.close();
+                },
+            })
+            return new Response(stream, {
+                status: router.state.statusCode,
+                headers: responseHeaders
+            });
+
+
         }
 
-        await write(fh, finalHtml)
+       
         return new Response(finalHtml, {
             status: router.state.statusCode,
             headers: responseHeaders

@@ -54,63 +54,63 @@ export async function render({
 
 
 
-  if (pathname.startsWith('/resume')) {
-    // Use the full pathname as the cache key (e.g. /resume or /resume/123)
+  // if (pathname.startsWith('/resume')) {
+  //   // Use the full pathname as the cache key (e.g. /resume or /resume/123)
 
 
-    // Strip the /resume prefix to get the original pathname used as the cache key
+  //   // Strip the /resume prefix to get the original pathname used as the cache key
 
 
 
 
-    const regBody = await req.json() as ResumeBody;
-    const postponed = JSON.parse(regBody.postponed);
-    const originalPath = regBody.path;
-    console.log('Resuming for original path:', originalPath);
-    if (postponed) {
-      const baseUrl = new URL(req.url);
-      const originalUrl = new URL(originalPath, `${baseUrl.protocol}//${baseUrl.host}`);
+  //   const regBody = await req.json() as ResumeBody;
+  //   const postponed = JSON.parse(regBody.postponed);
+  //   const originalPath = regBody.path;
+  //   console.log('Resuming for original path:', originalPath);
+  //   if (postponed) {
+  //     const baseUrl = new URL(req.url);
+  //     const originalUrl = new URL(originalPath, `${baseUrl.protocol}//${baseUrl.host}`);
 
-      const resumeHandler = createRequestHandler({
-        request: new Request(originalUrl.toString(), {
-          method: req.method,
-          headers: req.headers,
-        }),
-        createRouter: () => {
-          const r = createRouter();
-          // keep same head/context as main router
-          r.update({
-            context: {
-              ...r.options.context,
-              head: r.options.context.head,
-            },
-          });
-          return r;
-        },
-      });
+  //     const resumeHandler = createRequestHandler({
+  //       request: new Request(originalUrl.toString(), {
+  //         method: req.method,
+  //         headers: req.headers,
+  //       }),
+  //       createRouter: () => {
+  //         const r = createRouter();
+  //         // keep same head/context as main router
+  //         r.update({
+  //           context: {
+  //             ...r.options.context,
+  //             head: r.options.context.head,
+  //           },
+  //         });
+  //         return r;
+  //       },
+  //     });
 
-      // Use the resumeHandler to obtain a router instance matching the original path
-      return await resumeHandler(async ({ request: _req, responseHeaders: _h, router: resumeRouter }) => {
-        try {
-          const stream = await resume(<RouterServer router={resumeRouter} />, structuredClone(postponed), {
-            signal: req.signal,
-            onError: (error) => {
-              console.error('Error occurred while resuming:', error);
-            },
-          });
-          return new Response(stream, {
-            status: 200,
-            headers: { 'Content-Type': 'text/html' },
-          });
-        } catch (err) {
-          console.error('Resume render failed:', err);
-          return new Response('Resume failed', { status: 500 });
-        }
-      });
-    }
+  //     // Use the resumeHandler to obtain a router instance matching the original path
+  //     return await resumeHandler(async ({ request: _req, responseHeaders: _h, router: resumeRouter }) => {
+  //       try {
+  //         const stream = await resume(<RouterServer router={resumeRouter} />, structuredClone(postponed), {
+  //           signal: req.signal,
+  //           onError: (error) => {
+  //             console.error('Error occurred while resuming:', error);
+  //           },
+  //         });
+  //         return new Response(stream, {
+  //           status: 200,
+  //           headers: { 'Content-Type': 'text/html' },
+  //         });
+  //       } catch (err) {
+  //         console.error('Resume render failed:', err);
+  //         return new Response('Resume failed', { status: 500 });
+  //       }
+  //     });
+  //   }
 
 
-  }
+  // }
 
 
 
@@ -123,7 +123,7 @@ export async function render({
 
 
 
-    if (isProd) {
+    
 
       return renderRouterToPPR({
         request,
@@ -131,15 +131,7 @@ export async function render({
         responseHeaders,
         children: <RouterServer router={router} />,
       })
-    } else {
-
-      return renderRouterToStream({
-        request,
-        responseHeaders,
-        router,
-        children: <RouterServer router={router} />,
-      })
-    }
+    
 
 
 
